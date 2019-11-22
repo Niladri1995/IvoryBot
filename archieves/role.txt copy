@@ -1,0 +1,33 @@
+// Metadata
+module.exports = {
+  name: "Role Giving",
+  syntax: `${process.env.PREFIX}role [name of role]`,
+  description: "Assigns the given role",
+  help: "Role command ",
+  usage: [`\`${process.env.PREFIX}role [name of role]\` - The bot assigns role`]
+};
+
+module.exports.run = async (client, message, args) => {
+  if (args.length === 0) {
+    message.reply(
+      "please provide the role name.\nIf you want `Trick or Treat` role type `/role tt`"
+    );
+  }
+
+  if (args[0] === "tt") {
+    var role = message.guild.roles.find(role => role.name === "Trick or Treat");
+    message.member.addRole(role);
+
+    const Discord = require("discord.js");
+    const embed = new Discord.RichEmbed()
+      .setTitle("Done ✅")
+      .setDescription(`Role added Enjoy!`);
+
+    await message.delete(2000);
+    return message.author.send({ embed });
+  } else {
+    return message.channel.send(
+      "```Other Roles parameters dosent work for now!```"
+    );
+  }
+};

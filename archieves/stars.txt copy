@@ -1,0 +1,599 @@
+const fs = require("fs");
+const Discord = require("discord.js");
+const Canvas = require("canvas");
+const coc = require("./scripts/coc");
+
+module.exports = {
+  name: "War Stars",
+  syntax: `${process.env.PREFIX}stars [pg/snh]`,
+  description: "Calculates warstars for a given time frame",
+  help: "Calculates warstars for a given time frame",
+  usage: [
+    `\`${process.env.PREFIX}star [pg/snh]\` - Calculates warstars for a given time frame`
+  ]
+};
+
+module.exports.run = async (client, message, args) => {
+  if (args.length === 0) {
+    message.reply("Sorry! give me which clan Pg or Snh");
+  }
+
+  var endDate = new Date(2019, 9, 31);
+  var today = new Date();
+  var diffDays = parseInt(
+    (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  ).toFixed(0);
+
+  var countDownDay = 21 - diffDays;
+
+  if (args[0].toLowerCase() === "pg") {
+    let lineLength = 32;
+    let th12 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+    let th11 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+    let th10 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+    let th09 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+    let th08 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+
+    const array = client.warStarsData.array();
+    const sorted = array
+      .sort((a, b) => b.townHall - a.townHall)
+      .sort((a, b) => b.starGained - a.starGained);
+
+    for (const data of sorted) {
+      if (data.townHall === 12) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th12 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th12 += " ";
+        }
+        th12 += `${starGained}`;
+      }
+
+      if (data.townHall === 11) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th11 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th11 += " ";
+        }
+        th11 += `${starGained}`;
+      }
+
+      if (data.townHall === 10) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th10 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th10 += " ";
+        }
+        th10 += `${starGained}`;
+      }
+
+      if (data.townHall === 9) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th09 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th09 += " ";
+        }
+        th09 += `${starGained}`;
+      }
+
+      if (data.townHall === 8) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th08 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th08 += " ";
+        }
+        th08 += `${starGained}`;
+      }
+    }
+
+    th12 += "\n```";
+    th11 += "\n```";
+    th10 += "\n```";
+    th09 += "\n```";
+    th08 += "\n```";
+
+    const pages = {
+      1: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH12                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th12,
+        color: 1404896
+      },
+      2: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH11                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th11,
+        color: 14968116
+      },
+      3: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH10                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th10,
+        color: 12917788
+      },
+      4: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH9                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th09,
+        color: 1907743
+      },
+      5: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH8                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th08,
+        color: 12158747
+      }
+    };
+
+    let options = {
+      limit: 120 * 1000,
+      min: 1,
+      max: 5, // there will be 5 pages
+      page: 1
+    };
+
+    const m = await message.channel.send({
+      embed: pages[options.page]
+      /*pages[options.page]*/
+    });
+
+    await m.react("⬅");
+    await m.react("🔃");
+    await m.react("➡");
+    await m.react("🗑");
+
+    message.delete(150000).catch();
+    m.delete(150000).catch();
+
+    const collector = m.createReactionCollector(
+      (reaction, user) => user !== client.user
+    );
+
+    // Every time a button is pressed, run this function.
+    collector.on("collect", async messageReaction => {
+      // If the x button is pressed, remove the message.
+      if (messageReaction.emoji.name === "🗑") {
+        m.delete(); // Delete the message
+        message.delete();
+        collector.stop(); // Delete the collector.
+        return;
+      }
+      if (messageReaction.emoji.name === "⬅") {
+        if (options.page != options.min) {
+          options.page = options.page - 1;
+        }
+      }
+      if (messageReaction.emoji.name === "➡") {
+        if (options.page != options.max) {
+          options.page = options.page + 1;
+        }
+      }
+      if (messageReaction.emoji.name === "🔃") {
+        if (options.page != options.min) {
+          options.page = 1;
+        }
+      }
+      m.edit({ embed: pages[options.page] });
+
+      const notbot = messageReaction.users
+        .filter(clientuser => clientuser !== client.user)
+        .first();
+      await messageReaction.remove(notbot);
+    });
+  }
+
+  if (args[0].toLowerCase() === "snh") {
+    let lineLength = 32;
+    let th12 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+    let th11 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+    let th10 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+    let th09 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+    let th08 =
+      "```\nPlayers             Stars Gained\n--------------------------------";
+
+    const array = client.SnHwarStarsData.array();
+    const sorted = array
+      .sort((a, b) => b.townHall - a.townHall)
+      .sort((a, b) => b.starGained - a.starGained);
+
+    for (const data of sorted) {
+      if (data.townHall === 12) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th12 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th12 += " ";
+        }
+        th12 += `${starGained}`;
+      }
+
+      if (data.townHall === 11) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th11 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th11 += " ";
+        }
+        th11 += `${starGained}`;
+      }
+
+      if (data.townHall === 10) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th10 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th10 += " ";
+        }
+        th10 += `${starGained}`;
+      }
+
+      if (data.townHall === 9) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th09 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th09 += " ";
+        }
+        th09 += `${starGained}`;
+      }
+
+      if (data.townHall === 8) {
+        let playerName = data.playerName;
+        let starGained = data.starGained;
+
+        th08 += `\n${playerName}`;
+        let diff =
+          lineLength -
+          (playerName.toString().length + starGained.toString().length);
+        for (let i = 0; i < diff - 4; i++) {
+          th08 += " ";
+        }
+        th08 += `${starGained}`;
+      }
+    }
+
+    th12 += "\n```";
+    th11 += "\n```";
+    th10 += "\n```";
+    th09 += "\n```";
+    th08 += "\n```";
+
+    const pages = {
+      1: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH12                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th12,
+        color: 1404896
+      },
+      2: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH11                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th11,
+        color: 14968116
+      },
+      3: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH10                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th10,
+        color: 12917788
+      },
+      4: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH9                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th09,
+        color: 1907743
+      },
+      5: {
+        title:
+          "WAR STAR SMASH  ⭐⭐⭐\nTH8                                        Day " +
+          countDownDay +
+          " of 21",
+        description: th08,
+        color: 12158747
+      }
+    };
+
+    let options = {
+      limit: 120 * 1000,
+      min: 1,
+      max: 5, // there will be 5 pages
+      page: 1
+    };
+
+    const m = await message.channel.send({
+      embed: pages[options.page] /*pages[options.page]*/
+    });
+
+    await m.react("⬅");
+    await m.react("🔃");
+    await m.react("➡");
+    await m.react("🗑");
+
+    const collector = m.createReactionCollector(
+      (reaction, user) => user !== client.user
+    );
+
+    // Every time a button is pressed, run this function.
+    collector.on("collect", async messageReaction => {
+      // If the x button is pressed, remove the message.
+      if (messageReaction.emoji.name === "🗑") {
+        m.delete(); // Delete the message
+        message.delete();
+        collector.stop(); // Delete the collector.
+        return;
+      }
+      if (messageReaction.emoji.name === "⬅") {
+        if (options.page != options.min) {
+          options.page = options.page - 1;
+        }
+      }
+      if (messageReaction.emoji.name === "➡") {
+        if (options.page != options.max) {
+          options.page = options.page + 1;
+        }
+      }
+      if (messageReaction.emoji.name === "🔃") {
+        if (options.page != options.min) {
+          options.page = 1;
+        }
+      }
+      m.edit({ embed: pages[options.page] });
+
+      const notbot = messageReaction.users
+        .filter(clientuser => clientuser !== client.user)
+        .first();
+      await messageReaction.remove(notbot);
+    });
+    message.delete(150000).catch();
+    m.delete(150000).catch();
+  }
+
+  if (args[0] === "th") {
+    let townhall8 = 0;
+    let townhall9 = 0;
+    let townhall10 = 0;
+    let townhall11 = 0;
+    let townhall12 = 0;
+
+    const array = client.SnHwarStarsData.array();
+    const sorted = array
+      .sort((a, b) => b.townHall - a.townHall)
+      .sort((a, b) => b.starGained - a.starGained);
+
+    for (const data of sorted) {
+      if (data.townHall === 12) {
+        let starGained = data.starGained;
+
+        townhall12 += starGained;
+      }
+
+      if (data.townHall === 11) {
+        let starGained = data.starGained;
+        townhall11 += starGained;
+      }
+
+      if (data.townHall === 10) {
+        let starGained = data.starGained;
+        townhall10 += starGained;
+      }
+
+      if (data.townHall === 9) {
+        let starGained = data.starGained;
+        townhall9 += starGained;
+      }
+
+      if (data.townHall === 8) {
+        let starGained = data.starGained;
+
+        townhall8 += starGained;
+      }
+    }
+
+    let totalStars =
+      townhall8 + townhall9 + townhall10 + townhall11 + townhall12;
+
+    /* let percentage12 = (townhall12 / totalStars) * 100;
+    let percentage11 = (townhall11 / totalStars) * 100;
+    let percentage10 = (townhall10 / totalStars) * 100;
+    let percentage9 = (townhall9 / totalStars) * 100;
+    let percentage8 = (townhall8 / totalStars) * 100;*/
+
+    await message.channel.send("Processing...").then(async msg => {
+      msg.delete(3000);
+    });
+
+    const canvas = Canvas.createCanvas(800, 500);
+    const ctx = canvas.getContext("2d");
+
+    // Since the image takes time to load, you should await it
+    const background = await Canvas.loadImage(
+      "https://cdn.glitch.com/c9cc8547-392b-4b63-8c2e-af4bb9cd1a44%2Fwitch-clash-of-clans-artwork-09.jpg?v=1571551415004"
+    );
+
+    function roundedRectangle(x, y, w, h, radius) {
+      var context = canvas.getContext("2d");
+      var r = x + w;
+      var b = y + h;
+      context.beginPath();
+      context.strokeStyle = "green";
+      context.lineWidth = "4";
+      context.moveTo(x + radius, y);
+      context.lineTo(r - radius, y);
+      context.quadraticCurveTo(r, y, r, y + radius);
+      context.lineTo(r, y + h - radius);
+      context.quadraticCurveTo(r, b, r - radius, b);
+      context.lineTo(x + radius, b);
+      context.quadraticCurveTo(x, b, x, b - radius);
+      context.lineTo(x, y + radius);
+      context.quadraticCurveTo(x, y, x + radius, y);
+      context.closePath();
+      context.clip();
+    }
+
+    roundedRectangle(0, 0, canvas.width, canvas.height, 25);
+
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+    var drawPieChart = function(data, colors) {
+      var ctx = canvas.getContext("2d");
+      var x = canvas.width / 3.4;
+      var y = 200;
+      var color,
+        startAngle,
+        endAngle,
+        total = getTotal(data);
+
+      for (var i = 0; i < data.length; i++) {
+        color = colors[i];
+        startAngle = calculateStart(data, i, total);
+        endAngle = calculateEnd(data, i, total);
+
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, 170, startAngle, endAngle);
+        ctx.fill();
+        ctx.rect(canvas.width - 300, y - i * 35, 17, 17);
+        ctx.fill();
+        ctx.font = "22px sans-serif";
+        ctx.fillText(
+          data[i].label +
+            " - " +
+            data[i].value +
+            " (" +
+            calculatePercent(data[i].value, total) +
+            "%)",
+          canvas.width - 300 + 20,
+          y - i * 35 + 16
+        );
+      }
+    };
+
+    var calculatePercent = function(value, total) {
+      return ((value / total) * 100).toFixed(2);
+    };
+
+    var getTotal = function(data) {
+      var sum = 0;
+      for (var i = 0; i < data.length; i++) {
+        sum += data[i].value;
+      }
+
+      return sum;
+    };
+
+    var calculateStart = function(data, index, total) {
+      if (index === 0) {
+        return 0;
+      }
+
+      return calculateEnd(data, index - 1, total);
+    };
+
+    var calculateEndAngle = function(data, index, total) {
+      var angle = (data[index].value / total) * 360;
+      var inc = index === 0 ? 0 : calculateEndAngle(data, index - 1, total);
+
+      return angle + inc;
+    };
+
+    var calculateEnd = function(data, index, total) {
+      return degreeToRadians(calculateEndAngle(data, index, total));
+    };
+
+    var degreeToRadians = function(angle) {
+      return (angle * Math.PI) / 180;
+    };
+
+    var data = [
+      { label: "TH12", value: townhall12 },
+      { label: "TH11", value: townhall11 },
+      { label: "TH10", value: townhall10 },
+      { label: "TH9", value: townhall9 },
+      { label: "TH8", value: townhall8 }
+    ];
+    var colors = ["#4ca3dd", "#ff7f50", "#f6546a", "#cccccc", "#ffd700"];
+
+    drawPieChart(data, colors);
+
+    ctx.font = "27px Optima";
+    ctx.fillStyle = "#e09b24";
+
+    ctx.fillText("WAR STAR SMASH\n        OCT'19", 120, 440);
+    ctx.fillText("Stars", 565, 40);
+
+    const attachment = new Discord.Attachment(
+      canvas.toBuffer(),
+      "star%-image.png"
+    );
+    message.channel.send(attachment);
+  }
+};

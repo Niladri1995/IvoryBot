@@ -1,0 +1,25 @@
+const clashApi = require("clash-of-clans-api");
+let clientSc = clashApi({
+  token: process.env.COC_API
+});
+
+module.exports = {
+  name: "RoY",
+  syntax: `${process.env.PREFIX}roy`,
+  description: "Summons Roy",
+  help: "Roy command ",
+  usage: [`\`${process.env.PREFIX}eddy\` - The bot pings Roy`]
+};
+
+module.exports.run = async (client, message, args) => {
+  await clientSc.playerByTag(args[0]).then(response => {
+    console.log(response.achievements[31].value);
+  });
+
+  var arr = client.cgClanPGData.array();
+  let ret = "";
+  for (var i = 0; i < client.cgClanPGData.array().length; i++) {
+    ret += arr[i].clanGamesPoints + "   " + arr[i].playerName + "\n";
+  }
+  message.channel.send("```" + ret + "```");
+};
