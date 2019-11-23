@@ -95,12 +95,13 @@ module.exports = {
           }
           if (sorted[i].pointsGained > 4000) {
             ret += 4000;
+            total += 4000;
           } else {
             ret += sorted[i].pointsGained;
+            total += sorted[i].pointsGained;
           }
           ret += "  ";
           ret += sorted[i].playerName;
-          total += sorted[i].pointsGained;
         }
         ret += "```";
         if (total > 50000) {
