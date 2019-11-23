@@ -41,4 +41,9 @@ module.exports.run = (client, message, args) => {
     message.channel.send("```"+name+" : "+total+" -> "+point+"```");
     return;
   }
+  if (args[0] === ("set")) {
+    const key = `${process.env.CLAN_TAG}-${args[1]}`;
+    client.cgClanPGData.set(key,parseInt(args[2]),"pointsGained");
+    return;
+  }
 }
