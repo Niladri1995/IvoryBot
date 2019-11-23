@@ -33,4 +33,12 @@ module.exports.run = (client, message, args) => {
     client.cgClanPGData.delete(key);
     return;
   }
+  if (args[0] === ("get")) {
+    const key = `${process.env.CLAN_TAG}-${args[1]}`;
+    const point = client.cgClanPGData.get(key, "pointsGained");
+    const name =  client.cgClanPGData.get(key, "playerName");
+    const total =  client.cgClanPGData.get(key, "clanGamesPoints");
+    message.channel.send("```"+name+" : "+total+" -> "+point);
+    return;
+  }
 }
