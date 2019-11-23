@@ -38,7 +38,7 @@ module.exports.run = (client, message, args) => {
     const point = client.cgClanPGData.get(key, "pointsGained");
     const name =  client.cgClanPGData.get(key, "playerName");
     const total =  client.cgClanPGData.get(key, "clanGamesPoints");
-    message.channel.send("```"+name+" : "+total+" -> "+point);
+    message.channel.send("```"+name+" : "+total+" -> "+point+"```");
     return;
   }
 }
